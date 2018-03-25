@@ -21,6 +21,11 @@ char hexToDec(char hex) {
 
 char * hexToBase64(char *hex) {
     int n = strlen(hex);
+
+    // Compute the length of the base64 string. One hex digit is 4 bits. The
+    // length of the bit representation of the hex string is divided into
+    // groups of 6 bits. The length of the bit representation of the base64
+    // string must be a multiple of 6 to make room for padding.
     int nEncoded = (n * 4) / 6;
     if (nEncoded % 4 != 0) {
         nEncoded += 4 - (nEncoded % 4);
@@ -35,6 +40,7 @@ char * hexToBase64(char *hex) {
         int c = hexToDec(hex[i]);
         dec += c << (j++ * 4);
 
+        // We've formed a 24-bit block (4 bits per hex digit * 6 hex digits).
         if (j == 6) {
             while (dec > 0) {
                 char c = base64alphabet[dec & MASK_64];
@@ -42,13 +48,21 @@ char * hexToBase64(char *hex) {
                 encoded[--nEncoded] = c;
             }
 
+            // Reset for the next 24-bit block.
             j = 0;
             dec = 0;
         }
     }
 
+    // Padding example:
+    // 6    f    6    d
+    // 0110 1111 0110 1101
+    // 0110 1111 0110 1101 0000 0000
+    // bbbb bb22 2222 0000 00== ====
     if (j > 0) {
+        // How far were we off from a 24-bit block?
         int diff = 6 - j;
+        // How many 6-bit groups should be padding?
         int padding = (diff * 4) / 6;
         dec = dec << (4 * diff);
         while (dec > 0) {
