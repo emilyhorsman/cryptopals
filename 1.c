@@ -1,3 +1,4 @@
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -9,9 +10,21 @@
 char base64alphabet[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
 
+char hexToDec(char hex) {
+    if (hex < 'a') {
+        return hex - '0';
+    } else {
+        return 10 + hex - 'a';
+    }
+}
+
+
 char * hexToBase64(char *hex) {
     int n = strlen(hex);
     int nEncoded = (n * 4) / 6;
+    if (nEncoded % 4 != 0) {
+        nEncoded += 4 - (nEncoded % 4);
+    }
 
     char *encoded = malloc(sizeof(char) * (nEncoded + 1));
     encoded[nEncoded] = '\0';
@@ -19,16 +32,11 @@ char * hexToBase64(char *hex) {
     int dec = 0;
     int j = 0;
     for (int i = n - 1; i >= 0; i--) {
-        int c;
-        if (hex[i] < 'a') {
-            c = hex[i] - '0';
-        } else {
-            c = 10 + hex[i] - 'a';
-        }
-
+        int c = hexToDec(hex[i]);
         dec += c << (j++ * 4);
+
         if (j == 6) {
-            for (int k = 0; k < 4; k++) {
+            while (dec > 0) {
                 char c = base64alphabet[dec & MASK_64];
                 dec = dec >> 6;
                 encoded[--nEncoded] = c;
@@ -36,6 +44,21 @@ char * hexToBase64(char *hex) {
 
             j = 0;
             dec = 0;
+        }
+    }
+
+    if (j > 0) {
+        int diff = 6 - j;
+        int padding = (diff * 4) / 6;
+        dec = dec << (4 * diff);
+        for (; padding > 0; padding--) {
+            dec = dec >> 6;
+            encoded[--nEncoded] = '=';
+        }
+        while (dec > 0) {
+            char c = base64alphabet[dec & MASK_64];
+            dec = dec >> 6;
+            encoded[--nEncoded] = c;
         }
     }
 
