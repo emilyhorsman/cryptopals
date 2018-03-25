@@ -3,14 +3,13 @@
 #include <stdlib.h>
 #include <string.h>
 
-
-#define MASK_64 (1 << 6) - 1
-
-
-char base64alphabet[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+#include "set1.h"
 
 
-char hexToDec(char hex) {
+const uchar base64alphabet[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+
+
+uchar hexToDec(uchar hex) {
     if (hex < 'a') {
         return hex - '0';
     } else {
@@ -19,8 +18,8 @@ char hexToDec(char hex) {
 }
 
 
-char * hexToBase64(char *hex) {
-    int n = strlen(hex);
+uchar * hexToBase64(uchar *hex) {
+    int n = strlen((char *) hex);
 
     // Compute the length of the base64 string. One hex digit is 4 bits. The
     // length of the bit representation of the hex string is divided into
@@ -31,7 +30,7 @@ char * hexToBase64(char *hex) {
         nEncoded += 4 - (nEncoded % 4);
     }
 
-    char *encoded = malloc(sizeof(char) * (nEncoded + 1));
+    uchar *encoded = malloc(sizeof(uchar) * (nEncoded + 1));
     encoded[nEncoded] = '\0';
 
     int dec = 0;
@@ -43,7 +42,7 @@ char * hexToBase64(char *hex) {
         // We've formed a 24-bit block (4 bits per hex digit * 6 hex digits).
         if (j == 6) {
             while (dec > 0) {
-                char c = base64alphabet[dec & MASK_64];
+                uchar c = base64alphabet[dec & MASK_64];
                 dec = dec >> 6;
                 encoded[--nEncoded] = c;
             }
@@ -66,7 +65,7 @@ char * hexToBase64(char *hex) {
         int padding = (diff * 4) / 6;
         dec = dec << (4 * diff);
         while (dec > 0) {
-            char c;
+            uchar c;
             if (padding > 0) {
                 c = '=';
                 padding--;
@@ -82,15 +81,17 @@ char * hexToBase64(char *hex) {
 }
 
 
+#ifdef C1
 int main(int argc, char *argv[]) {
     if (argc != 2) {
         return 1;
     }
 
-    char *hex = argv[1];
-    char *base64 = hexToBase64(hex);
+    uchar *hex = (uchar *) argv[1];
+    char *base64 = (char *) hexToBase64(hex);
     printf("%s\n", base64);
     free(base64);
 
     return 0;
 }
+#endif
