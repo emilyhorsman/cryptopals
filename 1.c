@@ -1,23 +1,23 @@
-#include <string.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+
+#define MASK_64 (1 << 6) - 1
 
 
 char base64alphabet[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
 
-int main(int argc, char *argv[]) {
-    if (argc != 2) {
-        return 1;
-    }
-
-    char *hex = argv[1];
+char * hexToBase64(char *hex) {
     int n = strlen(hex);
-    int nPrime = (n * 4) / 6;
-    char encoded[nPrime + 1];
-    encoded[nPrime] = '\0';
+    int nEncoded = (n * 4) / 6;
+
+    char *encoded = malloc(sizeof(char) * (nEncoded + 1));
+    encoded[nEncoded] = '\0';
+
     int dec = 0;
     int j = 0;
-    int mask = (1 << 6) - 1;
     for (int i = n - 1; i >= 0; i--) {
         int c;
         if (hex[i] < 'a') {
@@ -29,9 +29,9 @@ int main(int argc, char *argv[]) {
         dec += c << (j++ * 4);
         if (j == 6) {
             for (int k = 0; k < 4; k++) {
-                char c = base64alphabet[dec & mask];
+                char c = base64alphabet[dec & MASK_64];
                 dec = dec >> 6;
-                encoded[--nPrime] = c;
+                encoded[--nEncoded] = c;
             }
 
             j = 0;
@@ -39,5 +39,19 @@ int main(int argc, char *argv[]) {
         }
     }
 
-    printf("%s\n", encoded);
+    return encoded;
+}
+
+
+int main(int argc, char *argv[]) {
+    if (argc != 2) {
+        return 1;
+    }
+
+    char *hex = argv[1];
+    char *base64 = hexToBase64(hex);
+    printf("%s\n", base64);
+    free(base64);
+
+    return 0;
 }
