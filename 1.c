@@ -51,12 +51,14 @@ char * hexToBase64(char *hex) {
         int diff = 6 - j;
         int padding = (diff * 4) / 6;
         dec = dec << (4 * diff);
-        for (; padding > 0; padding--) {
-            dec = dec >> 6;
-            encoded[--nEncoded] = '=';
-        }
         while (dec > 0) {
-            char c = base64alphabet[dec & MASK_64];
+            char c;
+            if (padding > 0) {
+                c = '=';
+                padding--;
+            } else {
+                c = base64alphabet[dec & MASK_64];
+            }
             dec = dec >> 6;
             encoded[--nEncoded] = c;
         }
