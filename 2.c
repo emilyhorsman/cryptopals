@@ -14,8 +14,8 @@ uchar decToHex(uchar dec) {
 }
 
 
-uchar * hexDecode(uchar *hex) {
-    int n = strlen((char *) hex) / 2;
+uchar * hexDecode(uchar *hex, unsigned int len) {
+    int n = len / 2;
     uchar *output = malloc(sizeof(uchar) * (n + 1));
     output[n] = '\0';
 
@@ -28,8 +28,7 @@ uchar * hexDecode(uchar *hex) {
 }
 
 
-uchar * hexEncode(uchar *plaintext) {
-    int n = strlen((char *) plaintext);
+uchar * hexEncode(uchar *plaintext, unsigned int n) {
     uchar *output = malloc(sizeof(uchar) * (n * 2 + 1));
     output[n] = '\0';
 
@@ -44,8 +43,7 @@ uchar * hexEncode(uchar *plaintext) {
 }
 
 
-uchar * stringXor(uchar *a, uchar *b) {
-    int n = strlen((char *) a);
+uchar * stringXor(uchar *a, uchar *b, unsigned int n) {
     uchar *output = malloc(sizeof(uchar) * (n + 1));
     output[n] = '\0';
 
@@ -64,11 +62,15 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
-    uchar *bufferA = hexDecode((uchar *) argv[1]);
-    uchar *bufferB = hexDecode((uchar *)argv[2]);
-    printf("Decode A: %s\nDecode B: %s\n", bufferA, bufferB);
-    uchar *s = hexEncode(stringXor(bufferA, bufferB));
+    int n = strlen(argv[1]);
+    uchar *bufferA = hexDecode((uchar *) argv[1], n);
+    uchar *bufferB = hexDecode((uchar *) argv[2], n);
+    uchar *result = stringXor(bufferA, bufferB, n / 2);
+    uchar *s = hexEncode(result, n / 2);
     printf("%s\n", s);
+    free(bufferA);
+    free(bufferB);
+    free(result);
     free(s);
 }
 #endif

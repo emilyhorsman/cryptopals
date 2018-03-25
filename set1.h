@@ -12,7 +12,8 @@ extern const uchar base64alphabet[];
 uchar hexToDec(uchar hex);
 uchar decToHex(uchar dec);
 uchar * hexToBase64(uchar *hex);
-uchar * stringXor(uchar *a, uchar *b);
-uchar * hexDecode(uchar *hex);
+uchar * stringXor(uchar *a, uchar *b, unsigned int n);
+uchar * hexDecode(uchar *hex, unsigned int len);
+uchar * hexEncode(uchar *plaintext, unsigned int n);
 
 #endif
